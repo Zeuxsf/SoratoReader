@@ -2,6 +2,10 @@ import pygame
 import utils as u
 import sys
 
+# Interessante:
+# Usar yield para ler as páginas do quadrinho
+
+
 def Reader():
     while True:
         for event in pygame.event.get():
@@ -11,7 +15,5 @@ def Reader():
 
         u.screen.fill((u.YELLOW))
 
-        font = pygame.font.SysFont("Arial", 40)
-        text = font.render("Lendo Quadrinhos...", True, u.DARK)
-        u.screen.blit(text, (120,240))
+        u.screen.blit(u.text("Lendo Quadrinhos..."), (120,240))
         pygame.display.update()
