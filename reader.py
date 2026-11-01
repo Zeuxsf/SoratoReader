@@ -15,13 +15,15 @@ def carregar_pagina(hq, n):
 
 def Reader():
     hq = pymupdf.open("HQs/Batman_Spiderman.pdf")
-    scroll_y = 0
     pagina = 0
     img = carregar_pagina(hq,pagina)
-    while True:
+    scroll_y = 0
 
-        u.screen.fill((u.DARK))
-        
+    while True:  
+
+        max_scroll = max(0,img.get_height() - u.screen.get_height())
+        scroll_y = max(0, min(scroll_y, max_scroll))  
+
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 pygame.quit()
@@ -33,15 +35,33 @@ def Reader():
                     nova = min(pagina + 1, len(hq) - 1)
                     print(nova)
                 
-                if e.key == pygame.K_LEFT:
+                elif e.key == pygame.K_LEFT:
                     nova = max(pagina - 1, 0 )
                     print(nova)
+
+                else:
+                    nova = pagina 
 
                 if nova != pagina:
                     pagina = nova
                     img = carregar_pagina(hq, pagina)
-                    scroll_y = 0
+                    scroll_y = max(0, min(0, max_scroll))
                     print(f"Pag {pagina}")
+                        
+
+        teclas = pygame.key.get_pressed()
+        if teclas[pygame.K_DOWN]:
+            scroll_y += 2
+            nova = pagina
+            
+        if teclas[pygame.K_UP]:
+            scroll_y -= 2
+            nova = pagina   
+        
+        u.screen.fill((u.DARK))
         u.screen.blit(img, (0, -scroll_y))    
 
         pygame.display.update()                    
+
+
+Reader()       
