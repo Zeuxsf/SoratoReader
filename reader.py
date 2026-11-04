@@ -3,6 +3,8 @@ import utils as u
 import sys
 import pymupdf
 
+imagem = pygame.image.load("hud.bmp")
+
 # Interessante:
 # Usar yield para ler as páginas do quadrinho
 
@@ -59,9 +61,10 @@ def Reader():
             nova = pagina   
         
         u.screen.fill((u.DARK))
-        u.screen.blit(img, (0, -scroll_y))    
+        u.screen.blit(img, (0, -scroll_y))
+        u.screen.blit(imagem, (0,0))    
 
         pygame.display.update()                    
 
 
-Reader()       
+Reader()
