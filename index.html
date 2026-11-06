@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SoratoConverter</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23000'/%3E%3Cpath d='M22 20h56v60H22z' fill='%232a00ff'/%3E%3Cpath d='M34 32h32v36H34z' fill='%23000'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--panel:#07041a;--line:#1b1260;--blue:#2a00ff;--blue-hi:#5b3dff;--text:#e9e6ff;--muted:#8a84b8;--ok:#4be3a0;--err:#ff5d73}
+*{box-sizing:border-box;margin:0}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.5;padding:max(24px,env(safe-area-inset-top)) 20px max(32px,env(safe-area-inset-bottom))}
+main{max-width:720px;margin:0 auto}
+header{display:flex;align-items:center;gap:18px;margin:24px 0 36px}
+header svg{width:72px;height:72px;flex:none}
+h1{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:clamp(32px,7vw,48px);letter-spacing:.01em;line-height:1}
+h1 span{color:var(--blue-hi)}
+header p{color:var(--muted);margin-top:8px}
+#drop{display:block;border:2px dashed var(--blue);background:var(--panel);padding:48px 20px;text-align:center;cursor:pointer;transition:background .15s,border-color .15s;position:relative}
+#drop:hover,#drop.over,#drop:focus-within{background:#0d0735;border-color:var(--blue-hi)}
+#drop strong{font-family:'Chakra Petch',sans-serif;font-size:22px;display:block;margin-bottom:6px}
+#drop small{color:var(--muted)}
+#drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.bar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:24px 0 12px}
+.bar label{color:var(--muted);font-size:14px;display:flex;gap:8px;align-items:center}
+select{background:var(--panel);color:var(--text);border:1px solid var(--line);padding:8px 10px;font:inherit}
+button{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:16px;background:var(--blue);color:#fff;border:0;padding:12px 22px;cursor:pointer}
+button:hover:not(:disabled){background:var(--blue-hi)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);padding:8px 14px;font-size:14px}
+button.ghost:hover:not(:disabled){background:var(--panel);color:var(--text)}
+button:focus-visible,select:focus-visible{outline:2px solid var(--blue-hi);outline-offset:2px}
+ul{list-style:none;padding:0}
+li{border:1px solid var(--line);background:var(--panel);padding:14px 16px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:6px 14px;align-items:center}
+.name{font-weight:500;overflow-wrap:anywhere}
+.st{color:var(--muted);font-size:13px;grid-column:1}
+.st.ok{color:var(--ok)}.st.err{color:var(--err)}
+li .act{grid-column:2;grid-row:1/3;display:flex;gap:8px}
+.track{grid-column:1/3;height:4px;background:#14104a}
+.fill{height:100%;width:0;background:var(--blue-hi);transition:width .15s}
+a.dl{font-family:'Chakra Petch',sans-serif;font-weight:700;background:var(--blue);color:#fff;text-decoration:none;padding:8px 16px;font-size:14px}
+a.dl:hover{background:var(--blue-hi)}
+footer{color:var(--muted);font-size:13px;margin-top:32px;text-align:center}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div>
+<h1>Sorato<span>Converter</span></h1>
+</div>
+</header>
+
+<label id="drop">
+<strong>Solte os arquivos aqui</strong>
+<small>ou toque para escolher &middot; .cbz e .cbr</small>
+<input id="file" type="file" accept=".cbz,.cbr,.zip,.rar" multiple>
+</label>
+
+<div class="bar">
+<label>Qualidade
+<select id="q">
+<option value="original">Original</option>
+<option value="0.85" selected>Alta (menor arquivo)</option>
+<option value="0.65">Média (bem menor)</option>
+</select>
+</label>
+<div>
+<button class="ghost" id="clear" disabled>Limpar</button>
+<button id="go" disabled>Converter</button>
+</div>
+</div>
+
+<ul id="list"></ul>
+
+<footer>Alexandre S. de França - 2026.</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const $=s=>document.querySelector(s)
+const list=$('#list'),drop=$('#drop'),input=$('#file'),go=$('#go'),clear=$('#clear')
+const IMG=/\.(jpe?g|png|webp|gif|bmp|avif)$/i
+const UNRAR='https://cdn.jsdelivr.net/npm/node-unrar-js@2.0.2'
+let items=[],busy=false,rarLib=null
+
+function add(files){
+ for(const f of files){
+  if(!/\.(cbz|cbr|zip|rar)$/i.test(f.name))continue
+  const li=document.createElement('li')
+  li.innerHTML='<span class="name"></span><span class="act"></span><span class="st">Na fila</span><div class="track"><div class="fill"></div></div>'
+  li.querySelector('.name').textContent=f.name
+  list.appendChild(li)
+  items.push({file:f,li,done:false})
+ }
+ refresh()
+}
+function refresh(){
+ go.disabled=busy||!items.some(i=>!i.done)
+ clear.disabled=busy||!items.length
+}
+function status(it,text,cls){
+ const s=it.li.querySelector('.st')
+ s.textContent=text
+ s.className='st'+(cls?' '+cls:'')
+}
+function progress(it,p){it.li.querySelector('.fill').style.width=Math.round(p*100)+'%'}
+
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')})
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'))
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');add(e.dataTransfer.files)})
+input.addEventListener('change',()=>{add(input.files);input.value=''})
+clear.addEventListener('click',()=>{items.forEach(i=>{const a=i.li.querySelector('a');if(a)URL.revokeObjectURL(a.href)});items=[];list.innerHTML='';refresh()})
+
+const sortName=(a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'})
+const keep=n=>IMG.test(n)&&!/(^|\/)(__MACOSX|\.)/.test(n)&&!/\/\./.test(n)
+
+async function pagesFromZip(buf,it){
+ const zip=await JSZip.loadAsync(buf)
+ const names=Object.keys(zip.files).filter(n=>!zip.files[n].dir&&keep(n)).map(n=>({name:n})).sort(sortName)
+ const out=[]
+ for(let i=0;i<names.length;i++){
+  out.push({name:names[i].name,data:await zip.files[names[i].name].async('uint8array')})
+  progress(it,(i+1)/names.length*.4)
+ }
+ return out
+}
+
+async function pagesFromRar(buf,it){
+ if(!rarLib){
+  const mod=await import(UNRAR+'/+esm')
+  const wasmBinary=await (await fetch(UNRAR+'/esm/js/unrar.wasm')).arrayBuffer()
+  rarLib={mod,wasmBinary}
+ }
+ const ex=await rarLib.mod.createExtractorFromData({wasmBinary:rarLib.wasmBinary,data:new Uint8Array(buf)})
+ const heads=[...ex.getFileList().fileHeaders].filter(h=>!h.flags.directory&&keep(h.name)).sort(sortName)
+ const res=ex.extract({files:heads.map(h=>h.name)})
+ const out=[]
+ let i=0
+ for(const f of res.files){
+  const ext=f.extraction
+  const data=ext&&ext.data?ext.data:ext
+  if(data&&data.length)out.push({name:f.fileHeader.name,data})
+  progress(it,++i/heads.length*.4)
+ }
+ return out.sort(sortName)
+}
+
+async function toJpeg(data,q){
+ const blob=new Blob([data])
+ const bmp=await createImageBitmap(blob)
+ const c=document.createElement('canvas')
+ c.width=bmp.width;c.height=bmp.height
+ const ctx=c.getContext('2d')
+ ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height)
+ ctx.drawImage(bmp,0,0)
+ const w=bmp.width,h=bmp.height
+ bmp.close()
+ const url=c.toDataURL('image/jpeg',q)
+ return{url,w,h}
+}
+
+function jpegSize(d){
+ let i=2
+ while(i<d.length){
+  if(d[i]!==0xFF){i++;continue}
+  const m=d[i+1]
+  if(m>=0xC0&&m<=0xCF&&m!==0xC4&&m!==0xC8&&m!==0xCC)return{h:(d[i+5]<<8)|d[i+6],w:(d[i+7]<<8)|d[i+8]}
+  i+=2+((d[i+2]<<8)|d[i+3])
+ }
+ return null
+}
+
+async function convert(it){
+ const buf=await it.file.arrayBuffer()
+ const head=new Uint8Array(buf,0,4)
+ const isZip=head[0]===0x50&&head[1]===0x4B
+ status(it,'Lendo arquivo...')
+ const pages=isZip?await pagesFromZip(buf,it):await pagesFromRar(buf,it)
+ if(!pages.length)throw new Error('Nenhuma imagem encontrada')
+ const qv=$('#q').value
+ let pdf=null
+ for(let i=0;i<pages.length;i++){
+  status(it,'Montando página '+(i+1)+' de '+pages.length)
+  const p=pages[i]
+  const isJpg=/\.jpe?g$/i.test(p.name)&&p.data[0]===0xFF&&p.data[1]===0xD8
+  let src,w,h
+  const size=isJpg&&qv==='original'?jpegSize(p.data):null
+  if(size){src=p.data;w=size.w;h=size.h}
+  else{const r=await toJpeg(p.data,qv==='original'?0.95:parseFloat(qv));src=r.url;w=r.w;h=r.h}
+  const fmt=[w,h]
+  const orient=w>h?'l':'p'
+  if(!pdf)pdf=new jspdf.jsPDF({unit:'px',format:fmt,orientation:orient,hotfixes:['px_scaling'],compress:true})
+  else pdf.addPage(fmt,orient)
+  pdf.addImage(src,'JPEG',0,0,w,h,undefined,'FAST')
+  pages[i]=null
+  progress(it,.4+(i+1)/pages.length*.6)
+  if(i%5===4)await new Promise(r=>setTimeout(r))
+ }
+ return pdf.output('blob')
+}
+
+go.addEventListener('click',async()=>{
+ busy=true;refresh()
+ for(const it of items){
+  if(it.done)continue
+  try{
+   const blob=await convert(it)
+   const url=URL.createObjectURL(blob)
+   const a=document.createElement('a')
+   a.className='dl';a.href=url;a.textContent='Baixar PDF'
+   a.download=it.file.name.replace(/\.[^.]+$/,'')+'.pdf'
+   it.li.querySelector('.act').appendChild(a)
+   status(it,'Pronto · '+(blob.size/1048576).toFixed(1)+' MB','ok')
+   progress(it,1)
+   it.done=true
+  }catch(e){
+   status(it,'Erro: '+(e&&e.message?e.message:'não foi possível converter este arquivo'),'err')
+   progress(it,0)
+  }
+ }
+ busy=false;refresh()
+})
+</script>
+</body>
+</html>
