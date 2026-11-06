@@ -5,6 +5,9 @@ import pymupdf
 
 hud = pygame.image.load("HUD.bmp")
 
+pygame.joystick.init()
+joy = pygame.joystick.Joystick(0)
+
 def carregar_pagina(hq, n):
     page = hq[n]
     zoom = 640 / page.rect.width
@@ -46,6 +49,20 @@ def Reader():
                     img = carregar_pagina(hq, pagina)
                     scroll_y = max(0, min(0, max_scroll))
 
+                if e.button == 12:
+                    exibir_hud = False
+                    c += 1
+                    if c >= 2:
+                        exibir_hud = True
+                        c = 0
+
+                if e.button == 2:
+                    return
+
+                if e.button == 13:
+                    pygame.quit()
+                    sys.exit()       
+
             if e.type == pygame.KEYDOWN:
                 
                 if e.key == pygame.K_RIGHT:
@@ -85,6 +102,14 @@ def Reader():
             
         if teclas[pygame.K_UP]:
             scroll_y -= 2
+            nova = pagina 
+
+        if joy.get_button(9):
+            scroll_y += 8
+            nova = pagina
+            
+        if joy.get_button(8):
+            scroll_y -= 8
             nova = pagina   
         
         u.screen.fill((u.DARK))
@@ -94,3 +119,5 @@ def Reader():
             u.screen.blit(hud, (0,0))    
 
         pygame.display.update()                    
+
+Reader()

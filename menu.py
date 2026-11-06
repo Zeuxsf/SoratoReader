@@ -10,6 +10,9 @@ pygame.init()
 # Botão Biblioteca
 # Botão Sair
 
+pygame.joystick.init()
+joy = pygame.joystick.Joystick(0)
+
 def Menu():
     btns = ["play","quit"]
     selected = 0
@@ -44,11 +47,21 @@ def Menu():
                         r.Reader() 
                     else:
                         pygame.quit()
-                        sys.exit()     
+                        sys.exit()  
+
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button == 8:
+                    selected = (selected + 1) % len(btns)
+                if e.button == 9:
+                    selected = (selected - 1) % len(btns)
+                elif e.button == 1:
+                    if selected == 0:
+                        r.Reader() 
+                    else:
+                        pygame.quit()
+                        sys.exit()  
                 
 
         pygame.display.update()                       
 
 Menu()
-
-pygame.quit()    
