@@ -3,10 +3,10 @@ import utils as u
 import sys
 import pymupdf
 
-imagem = pygame.image.load("hud.bmp")
+imagem = pygame.image.load("HUD.bmp")
 
-# Interessante:
-# Usar yield para ler as páginas do quadrinho
+#pygame.joystick.init()
+#joy = pygame.joystick.Joystick(0)
 
 def carregar_pagina(hq, n):
     page = hq[n]
@@ -31,13 +31,13 @@ def Reader():
                 pygame.quit()
                 sys.exit()
 
-            if e.type == pygame.KEYDOWN:
+            if e.type == pygame.JOYBUTTONDOWN:
                 
-                if e.key == pygame.K_RIGHT:
+                if e.button == 5:
                     nova = min(pagina + 1, len(hq) - 1)
                     print(nova)
                 
-                elif e.key == pygame.K_LEFT:
+                elif e.button == 4:
                     nova = max(pagina - 1, 0 )
                     print(nova)
 
@@ -49,14 +49,14 @@ def Reader():
                     img = carregar_pagina(hq, pagina)
                     scroll_y = max(0, min(0, max_scroll))
                     print(f"Pag {pagina}")
+                    
                         
 
-        teclas = pygame.key.get_pressed()
-        if teclas[pygame.K_DOWN]:
+        if joy.get_button(9):
             scroll_y += 2
             nova = pagina
             
-        if teclas[pygame.K_UP]:
+        if joy.get_button(8):
             scroll_y -= 2
             nova = pagina   
         
@@ -67,4 +67,3 @@ def Reader():
         pygame.display.update()                    
 
 
-Reader()

@@ -1,7 +1,7 @@
 import pygame
 import sys
 import utils as u
-import reader as r
+import reader2 as r
 
 pygame.init()
 
