@@ -3,10 +3,13 @@ import utils as u
 import sys
 import pymupdf
 
-hud = pygame.image.load("HUD.bmp")
+hud = pygame.image.load("images/HUD.bmp")
 
-pygame.joystick.init()
-joy = pygame.joystick.Joystick(0)
+modo_dev = True
+
+if modo_dev == False:
+    pygame.joystick.init()
+    joy = pygame.joystick.Joystick(0)
 
 def carregar_pagina(hq, n):
     page = hq[n]
@@ -16,7 +19,7 @@ def carregar_pagina(hq, n):
 
 
 def Reader():
-    hq = pymupdf.open("HQs/Batman_Spiderman.pdf")
+    hq = pymupdf.open("HQs/Blue_Book.pdf")
     pagina = 0
     img = carregar_pagina(hq,pagina)
     scroll_y = 0
@@ -94,7 +97,6 @@ def Reader():
                     sys.exit()              
                     
                         
-
         teclas = pygame.key.get_pressed()
         if teclas[pygame.K_DOWN]:
             scroll_y += 2
@@ -104,13 +106,14 @@ def Reader():
             scroll_y -= 2
             nova = pagina 
 
-        if joy.get_button(9):
-            scroll_y += 8
-            nova = pagina
-            
-        if joy.get_button(8):
-            scroll_y -= 8
-            nova = pagina   
+        if modo_dev == False:
+            if joy.get_button(9):
+                scroll_y += 8
+                nova = pagina
+                
+            if joy.get_button(8):
+                scroll_y -= 8
+                nova = pagina   
         
         u.screen.fill((u.DARK))
         u.screen.blit(img, (0, -scroll_y))
@@ -119,5 +122,3 @@ def Reader():
             u.screen.blit(hud, (0,0))    
 
         pygame.display.update()                    
-
-Reader()

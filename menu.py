@@ -10,26 +10,24 @@ pygame.init()
 # Botão Biblioteca
 # Botão Sair
 
-pygame.joystick.init()
-joy = pygame.joystick.Joystick(0)
+menu = pygame.image.load("images/MENU.bmp")
+info = pygame.image.load("images/INFO.bmp")
+
+
+modo_dev = True
+
+if modo_dev == False:
+    pygame.joystick.init()
+    joy = pygame.joystick.Joystick(0)
 
 def Menu():
-    btns = ["play","quit"]
-    selected = 0
+    exibir_info = False
+    c = 0
     while True:
         u.screen.fill(u.WHITE)
 
-        play_btn = pygame.Rect(250,200,140,50)
-        quit_btn = pygame.Rect(250,300,140,50)
 
-        pygame.draw.rect(u.screen, u.LIGHT if selected == 0 else u.DARK, play_btn)
-        pygame.draw.rect(u.screen, u.LIGHT if selected == 1 else u.DARK, quit_btn)
-
-        play_text = u.text("Play")
-        quit_text = u.text("Quit")
-
-        u.screen.blit(play_text, (275, 200))
-        u.screen.blit(quit_text, (275, 300))
+        u.screen.blit(menu, (0, 0))
 
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -38,28 +36,20 @@ def Menu():
 
 
             if e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_UP:
-                    selected = (selected + 1) % len(btns)
-                if e.key == pygame.K_DOWN:
-                    selected = (selected - 1) % len(btns)
-                elif e.key == pygame.K_KP_ENTER or e.key == pygame.KSCAN_KP_ENTER:
-                    if selected == 0:
-                        r.Reader() 
-                    else:
-                        pygame.quit()
-                        sys.exit()  
+                if e.key == pygame.K_KP_ENTER:
+                    r.Reader() 
+                if e.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                if e.key == pygame.K_TAB:
+                    c += 1
+                    exibir_info = True
+                    if c >= 2:
+                        exibir_info = False
+                        c = 0
 
-            if e.type == pygame.JOYBUTTONDOWN:
-                if e.button == 8:
-                    selected = (selected + 1) % len(btns)
-                if e.button == 9:
-                    selected = (selected - 1) % len(btns)
-                elif e.button == 1:
-                    if selected == 0:
-                        r.Reader() 
-                    else:
-                        pygame.quit()
-                        sys.exit()  
+        if exibir_info:
+            u.screen.blit(info, (0,0))
                 
 
         pygame.display.update()                       
