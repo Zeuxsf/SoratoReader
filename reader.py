@@ -3,10 +3,13 @@ import utils as u
 import sys
 import pymupdf
 
-imagem = pygame.image.load("HUD.bmp")
+hud = pygame.image.load("images/HUD.bmp")
 
-#pygame.joystick.init()
-#joy = pygame.joystick.Joystick(0)
+modo_dev = False
+
+if modo_dev == False:
+    pygame.joystick.init()
+    joy = pygame.joystick.Joystick(0)
 
 def carregar_pagina(hq, n):
     page = hq[n]
@@ -16,10 +19,12 @@ def carregar_pagina(hq, n):
 
 
 def Reader():
-    hq = pymupdf.open("HQs/Batman_Spiderman.pdf")
+    hq = pymupdf.open("HQs/Blue_Book.pdf")
     pagina = 0
     img = carregar_pagina(hq,pagina)
     scroll_y = 0
+    exibir_hud = True
+    c = 0
 
     while True:  
 
@@ -35,11 +40,9 @@ def Reader():
                 
                 if e.button == 5:
                     nova = min(pagina + 1, len(hq) - 1)
-                    print(nova)
                 
                 elif e.button == 4:
                     nova = max(pagina - 1, 0 )
-                    print(nova)
 
                 else:
                     nova = pagina 
@@ -48,22 +51,74 @@ def Reader():
                     pagina = nova
                     img = carregar_pagina(hq, pagina)
                     scroll_y = max(0, min(0, max_scroll))
-                    print(f"Pag {pagina}")
+
+                if e.button == 12:
+                    exibir_hud = False
+                    c += 1
+                    if c >= 2:
+                        exibir_hud = True
+                        c = 0
+
+                if e.button == 2:
+                    return
+
+                if e.button == 13:
+                    pygame.quit()
+                    sys.exit()       
+
+            if e.type == pygame.KEYDOWN:
+                
+                if e.key == pygame.K_RIGHT:
+                    nova = min(pagina + 1, len(hq) - 1)
+                
+                elif e.key == pygame.K_LEFT:
+                    nova = max(pagina - 1, 0 )
+
+                else:
+                    nova = pagina 
+
+                if nova != pagina:
+                    pagina = nova
+                    img = carregar_pagina(hq, pagina)
+                    scroll_y = max(0, min(0, max_scroll)) 
+
+                if e.key == pygame.K_TAB:
+                    exibir_hud = False
+                    c += 1
+                    if c >= 2:
+                        exibir_hud = True
+                        c = 0
+
+                if e.key == pygame.K_BACKSPACE:
+                    return
+
+                if e.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()              
                     
                         
-
-        if joy.get_button(9):
+        teclas = pygame.key.get_pressed()
+        if teclas[pygame.K_DOWN]:
             scroll_y += 2
             nova = pagina
             
-        if joy.get_button(8):
+        if teclas[pygame.K_UP]:
             scroll_y -= 2
-            nova = pagina   
+            nova = pagina 
+
+        if modo_dev == False:
+            if joy.get_button(9):
+                scroll_y += 8
+                nova = pagina
+                
+            if joy.get_button(8):
+                scroll_y -= 8
+                nova = pagina   
         
         u.screen.fill((u.DARK))
         u.screen.blit(img, (0, -scroll_y))
-        u.screen.blit(imagem, (0,0))    
+
+        if exibir_hud:
+            u.screen.blit(hud, (0,0))    
 
         pygame.display.update()                    
-
-

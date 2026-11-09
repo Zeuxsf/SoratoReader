@@ -1,7 +1,7 @@
 import pygame
 import sys
 import utils as u
-import reader2 as r
+import reader as r
 
 pygame.init()
 
@@ -14,7 +14,7 @@ menu = pygame.image.load("images/MENU.bmp")
 info = pygame.image.load("images/INFO.bmp")
 
 
-modo_dev = True
+modo_dev = False
 
 if modo_dev == False:
     pygame.joystick.init()
@@ -47,6 +47,18 @@ def Menu():
                     if c >= 2:
                         exibir_info = False
                         c = 0
+            
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button == 2:
+                    exibir_info = False
+                    r.Reader() 
+                if e.button == 13:
+                    pygame.quit()
+                    sys.exit()
+                if e.button == 12:
+                    exibir_info = True
+                if e.button == 0:
+                    exibir_info = False                        
 
         if exibir_info:
             u.screen.blit(info, (0,0))
