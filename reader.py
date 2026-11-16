@@ -5,7 +5,7 @@ import pymupdf
 
 hud = pygame.image.load("images/HUD.bmp")
 
-modo_dev = False
+modo_dev = True
 
 if modo_dev == False:
     pygame.joystick.init()
@@ -18,8 +18,8 @@ def carregar_pagina(hq, n):
     return pygame.image.frombuffer(pixel.samples, (pixel.width, pixel.height), "RGB")
 
 
-def Reader():
-    hq = pymupdf.open("HQs/Blue_Book.pdf")
+def Reader(arquivo):
+    hq = pymupdf.open(arquivo)
     pagina = 0
     img = carregar_pagina(hq,pagina)
     scroll_y = 0
