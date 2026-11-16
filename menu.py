@@ -2,6 +2,7 @@ import pygame
 import sys
 import utils as u
 import reader as r
+from biblioteca_teste import navegador
 
 pygame.init()
 
@@ -14,7 +15,7 @@ menu = pygame.image.load("images/MENU.bmp")
 info = pygame.image.load("images/INFO.bmp")
 
 
-modo_dev = False
+modo_dev = True
 
 if modo_dev == False:
     pygame.joystick.init()
@@ -41,6 +42,8 @@ def Menu():
                 if e.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
+                if e.key == pygame.K_RETURN:
+                    navegador()
                 if e.key == pygame.K_TAB:
                     c += 1
                     exibir_info = True

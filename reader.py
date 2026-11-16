@@ -18,7 +18,7 @@ def carregar_pagina(hq, n):
     return pygame.image.frombuffer(pixel.samples, (pixel.width, pixel.height), "RGB")
 
 
-def Reader(arquivo):
+def Reader(arquivo = "Library/Blue_Book.pdf"):
     hq = pymupdf.open(arquivo)
     pagina = 0
     img = carregar_pagina(hq,pagina)

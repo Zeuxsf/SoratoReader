@@ -2,6 +2,7 @@ import os
 import pygame
 import utils as u
 from reader import Reader
+import json
 
 lib_hud = pygame.image.load("images/LIB.bmp")
 colecao_img = pygame.image.load("images/colecao.bmp")
@@ -17,6 +18,16 @@ linhas_visiveis = (altura - topo) // altura_linha
 base = os.path.dirname(os.path.abspath(__file__))
 raiz = os.path.join(base, "Library")
 os.makedirs(raiz, exist_ok=True)
+
+def carregar_json():
+    with open("favorites.json", "r") as f:
+        dados = json.load(f)
+    return dados
+
+def salvar_json(dados):
+    with open("favorites.json", "w") as f:
+        json.dump(dados, f)
+
 
 def listar(pasta):
     colecoes = []
@@ -63,13 +74,23 @@ def navegador():
                     else:
                         Reader(caminho)
                         pygame.event.clear()
-                elif e.key == pygame.K_ESCAPE:
+                elif e.key == pygame.K_BACKSPACE:
                     if pasta == raiz:
                         return
                     pasta = os.path.dirname(pasta)
                     itens = listar(pasta)
                     selecionado = 0
                     inicio = 0
+                elif e.key == pygame.K_f and itens:
+                    nome, caminho, is_pasta = itens[selecionado]
+                    dados = carregar_json()
+                    if nome in dados["names"]:
+                        dados["names"].remove(nome)
+                        salvar_json(dados)
+                    elif not is_pasta:
+                            dados["names"].append(nome)
+                            salvar_json(dados)
+                    
 
             if selecionado < inicio:
                 inicio = selecionado
@@ -97,7 +118,13 @@ def navegador():
             if is_pasta:
                 u.screen.blit(u.resize_icon(colecao_img,24,24), (30, lateral))
             else:
-                u.screen.blit(u.resize_icon(livro_img,20,20), (30, lateral))
+                
+                dados = carregar_json()
+
+                if nome in dados["names"]:
+                    u.screen.blit(u.resize_icon(favorito_img,20,20), (30, lateral))
+                else:
+                    u.screen.blit(u.resize_icon(livro_img,20,20), (30, lateral))
             
             titulo = os.path.splitext(nome)[0]
             u.screen.blit(fonte.render(titulo, True, cor), (30 + 24 + 8, lateral))
@@ -111,6 +138,6 @@ def main():
     navegador()
     pygame.quit()
 
-main()
-
+if __name__ == "__main__":
+    main()
         
