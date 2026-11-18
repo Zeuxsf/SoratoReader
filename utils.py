@@ -1,4 +1,5 @@
 import pygame
+import json
 
 # Configurações
 screen = pygame.display.set_mode((640,480))
@@ -20,6 +21,21 @@ def text(msg: str):
     text = font.render(msg, True, DARK)
     return text
 
+# Imagem
 def resize_icon(icon, h, w):
     resized_icon = pygame.transform.smoothscale(icon, (h,w))
     return resized_icon
+
+# Salvamento em JSON
+def load_json(file):
+    with open(file, "r") as f:
+        data = json.load(f)
+    return data
+
+def save_json(data, file):
+    with open(file, "w") as f:
+        json.dump(data, f, indent=4)
+
+def add_json(data, file):
+    with open(file, "a") as f:
+        json.dump(data, f, indent=4)
