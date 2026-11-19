@@ -21,21 +21,24 @@ def carregar_pagina(hq, n):
 def Reader(caminho = "Library/Blue_Book.pdf"):
 
     try:
-        dados = u.load_json("history.json")
+        dados = u.load_json()
+        for c in dados.keys():
+            dados[c][2] = False 
 
         if caminho in dados.keys():
             for c in dados.keys():
                 if c == caminho:
-                    pagina = dados[caminho]
+                    dados[caminho][2] = True
+                    pagina = dados[caminho][1]
         else:
             pagina = 0
-            dados[caminho] = pagina
-            u.save_json(dados, "history.json")
+            dados[caminho] = [False, pagina, True]
+            u.save_json(dados)
     except:
         dados = {}
         pagina = 0
-        dados[caminho] = pagina
-        u.save_json(dados, "history.json")
+        dados[caminho] = [False, pagina, True]
+        u.save_json(dados)
 
     hq = pymupdf.open(caminho)
     img = carregar_pagina(hq,pagina)
@@ -89,15 +92,15 @@ def Reader(caminho = "Library/Blue_Book.pdf"):
                     nova = min(pagina + 1, len(hq) - 1)
                     for c in dados.keys():
                         if c == caminho:
-                            dados[caminho] = nova
-                    u.save_json(dados, "history.json")
+                            dados[caminho][1] = nova
+                    u.save_json(dados)
                 
                 elif e.key == pygame.K_LEFT:
                     nova = max(pagina - 1, 0 )
                     for c in dados.keys():
                         if c == caminho:
-                            dados[caminho] = nova
-                    u.save_json(dados, "history.json")
+                            dados[caminho][1] = nova
+                    u.save_json(dados)
 
                 else:
                     nova = pagina 

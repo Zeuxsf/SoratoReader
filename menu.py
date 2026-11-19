@@ -2,7 +2,7 @@ import pygame
 import sys
 import utils as u
 import reader as r
-from biblioteca_teste import navegador
+from library import navegador
 
 pygame.init()
 
@@ -38,7 +38,13 @@ def Menu():
 
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_KP_ENTER:
-                    r.Reader() 
+                    try:
+                        dados = u.load_json()
+                        for c in dados.keys():
+                            if dados[c][2] == True:
+                                r.Reader(c)
+                    except:
+                        print("Leia algum arquivo.")
                 if e.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()

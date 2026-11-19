@@ -27,15 +27,15 @@ def resize_icon(icon, h, w):
     return resized_icon
 
 # Salvamento em JSON
-def load_json(file):
-    with open(file, "r") as f:
+def load_json():
+    with open("history.json", "r") as f:
         data = json.load(f)
     return data
 
-def save_json(data, file):
-    with open(file, "w") as f:
+def save_json(data):
+    with open("history.json", "w") as f:
         json.dump(data, f, indent=4)
 
-def add_json(data, file):
-    with open(file, "a") as f:
+def add_json(data):
+    with open("history.json", "a") as f:
         json.dump(data, f, indent=4)

@@ -61,8 +61,8 @@ def navegador():
                         selecionado = 0
                         inicio = 0
                     else:
-                        caminho_relativo = os.path.relpath(caminho, os.path.dirname(raiz))
-                        Reader(caminho_relativo)
+                        caminho = os.path.relpath(caminho, os.path.dirname(raiz))
+                        Reader(caminho)
                         pygame.event.clear()
                 elif e.key == pygame.K_BACKSPACE:
                     if pasta == raiz:
@@ -71,15 +71,30 @@ def navegador():
                     itens = listar(pasta)
                     selecionado = 0
                     inicio = 0
+               
                 elif e.key == pygame.K_f and itens:
                     nome, caminho, is_pasta = itens[selecionado]
-                    dados = u.load_json("favorites.json")
-                    if nome in dados["names"]:
-                        dados["names"].remove(nome)
-                        u.save_json(dados,"favorites.json")
-                    elif not is_pasta:
-                            dados["names"].append(nome)
-                            u.save_json(dados,"favorites.json")
+                    caminho = os.path.relpath(caminho, os.path.dirname(raiz))
+
+                    try:
+                        dados = u.load_json()
+
+                        if caminho not in dados:
+                            if not is_pasta:
+                                dados[caminho] = [True, 0, False]
+                                u.save_json(dados)
+                        elif dados[caminho][0] == True:
+                            dados[caminho][0] = False
+                            u.save_json(dados)
+                        else:
+                            dados[caminho][0] = True
+                            u.save_json(dados)    
+                    except:
+                        dados = {}
+                        dados[caminho] = [True, 0, False]
+                        u.save_json(dados)
+
+   
                     
 
             if selecionado < inicio:
@@ -94,6 +109,7 @@ def navegador():
             u.screen.blit(fonte.render(" :( ", True, u.WHITE), (20, topo))
 
         for i, (nome, caminho, is_pasta) in enumerate(itens[inicio:inicio + linhas_visiveis]):
+            caminho = os.path.relpath(caminho, os.path.dirname(raiz))
             real = inicio + i
             if real == selecionado:
                 cor = u.WHITE
@@ -108,14 +124,19 @@ def navegador():
             if is_pasta:
                 u.screen.blit(u.resize_icon(colecao_img,24,24), (30, lateral))
             else:
-                
-                dados = u.load_json("favorites.json")
+                try:
+                    dados = u.load_json()
+                except:
+                    dados = {}
 
-                if nome in dados["names"]:
-                    u.screen.blit(u.resize_icon(favorito_img,20,20), (30, lateral))
+                if caminho in dados:
+                    if dados[caminho][0] == True:
+                        u.screen.blit(u.resize_icon(favorito_img,20,20), (30, lateral))
+                    else:
+                        u.screen.blit(u.resize_icon(livro_img,20,20), (30, lateral))
                 else:
-                    u.screen.blit(u.resize_icon(livro_img,20,20), (30, lateral))
-            
+                    u.screen.blit(u.resize_icon(livro_img,20,20), (30, lateral))        
+
             titulo = os.path.splitext(nome)[0]
             u.screen.blit(fonte.render(titulo, True, cor), (30 + 24 + 8, lateral))
 

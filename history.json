@@ -1,5 +1,7 @@
 {
-    "Library/Blue_Book.pdf": 16,
-    "Library/Batman/Batman_Futuro.pdf": 8,
-    "Library/Batman/Batman_Spiderman.pdf": 3
+    "Library/Blue_Book.pdf": [
+        true,
+        6,
+        true
+    ]
 }
