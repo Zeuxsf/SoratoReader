@@ -3,11 +3,14 @@ import pygame
 import utils as u
 from reader import Reader
 
+if u.modo_dev == False:
+    pygame.joystick.init()
+    joy = pygame.joystick.Joystick(0)
+
 lib_hud = pygame.image.load("images/LIB.bmp")
 colecao_img = pygame.image.load("images/colecao.bmp")
 livro_img = pygame.image.load("images/livro.bmp")
 favorito_img = pygame.image.load("images/favorito.bmp")
-
 
 largura, altura = 640, 480
 altura_linha = 32
@@ -93,9 +96,53 @@ def navegador():
                         dados = {}
                         dados[caminho] = [True, 0, False]
                         u.save_json(dados)
+            
+            if e.type == pygame.JOYBUTTONDOWN:
+                if e.button == 9 and itens:
+                    selecionado = (selecionado + 1) % len(itens)
+                elif e.button == 8 and itens:
+                    selecionado = (selecionado - 1) % len(itens)
+                elif e.button == 1 and itens:
+                    nome, caminho, is_pasta = itens[selecionado]
+                    if is_pasta:
+                        pasta = caminho
+                        itens = listar(pasta)
+                        selecionado = 0
+                        inicio = 0
+                    else:
+                        caminho = os.path.relpath(caminho, os.path.dirname(raiz))
+                        Reader(caminho)
+                        pygame.event.clear()
+                elif e.button == 0:
+                    if pasta == raiz:
+                        return
+                    pasta = os.path.dirname(pasta)
+                    itens = listar(pasta)
+                    selecionado = 0
+                    inicio = 0
+               
+                elif e.button == 3 and itens:
+                    nome, caminho, is_pasta = itens[selecionado]
+                    caminho = os.path.relpath(caminho, os.path.dirname(raiz))
 
-   
-                    
+                    try:
+                        dados = u.load_json()
+
+                        if caminho not in dados:
+                            if not is_pasta:
+                                dados[caminho] = [True, 0, False]
+                                u.save_json(dados)
+                        elif dados[caminho][0] == True:
+                            dados[caminho][0] = False
+                            u.save_json(dados)
+                        else:
+                            dados[caminho][0] = True
+                            u.save_json(dados)    
+                    except:
+                        dados = {}
+                        dados[caminho] = [True, 0, False]
+                        u.save_json(dados)
+                  
 
             if selecionado < inicio:
                 inicio = selecionado

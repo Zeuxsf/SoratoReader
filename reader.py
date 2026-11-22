@@ -5,9 +5,7 @@ import pymupdf
 
 hud = pygame.image.load("images/HUD.bmp")
 
-modo_dev = True
-
-if modo_dev == False:
+if u.modo_dev == False:
     pygame.joystick.init()
     joy = pygame.joystick.Joystick(0)
 
@@ -60,9 +58,17 @@ def Reader(caminho = "Library/Blue_Book.pdf"):
                 
                 if e.button == 5:
                     nova = min(pagina + 1, len(hq) - 1)
+                    for c in dados.keys():
+                        if c == caminho:
+                            dados[caminho][1] = nova
+                    u.save_json(dados)
                 
                 elif e.button == 4:
                     nova = max(pagina - 1, 0 )
+                    for c in dados.keys():
+                        if c == caminho:
+                            dados[caminho][1] = nova
+                    u.save_json(dados)
 
                 else:
                     nova = pagina 
@@ -79,7 +85,7 @@ def Reader(caminho = "Library/Blue_Book.pdf"):
                         exibir_hud = True
                         c = 0
 
-                if e.button == 2:
+                if e.button == 0:
                     return
 
                 if e.button == 13:
@@ -134,7 +140,7 @@ def Reader(caminho = "Library/Blue_Book.pdf"):
             scroll_y -= 2
             nova = pagina 
 
-        if modo_dev == False:
+        if u.modo_dev == False:
             if joy.get_button(9):
                 scroll_y += 8
                 nova = pagina

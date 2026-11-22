@@ -1,7 +1,12 @@
 {
     "Library/Blue_Book.pdf": [
-        true,
-        6,
+        false,
+        7,
+        false
+    ],
+    "Library/Nada/Blue_Book.pdf": [
+        false,
+        4,
         true
     ]
 }

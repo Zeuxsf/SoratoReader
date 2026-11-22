@@ -5,6 +5,7 @@ import json
 screen = pygame.display.set_mode((640,480))
 clock = pygame.time.Clock()
 running = True
+modo_dev = True
 
 # Cores
 WHITE = (255,255,255)

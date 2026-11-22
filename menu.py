@@ -14,10 +14,7 @@ pygame.init()
 menu = pygame.image.load("images/MENU.bmp")
 info = pygame.image.load("images/INFO.bmp")
 
-
-modo_dev = True
-
-if modo_dev == False:
+if u.modo_dev == False:
     pygame.joystick.init()
     joy = pygame.joystick.Joystick(0)
 
@@ -60,14 +57,24 @@ def Menu():
             if e.type == pygame.JOYBUTTONDOWN:
                 if e.button == 2:
                     exibir_info = False
-                    r.Reader() 
+                    try:
+                        dados = u.load_json()
+                        for c in dados.keys():
+                            if dados[c][2] == True:
+                                r.Reader(c)
+                    except:
+                        print("Leia algum arquivo.")
+                if e.button == 1:
+                    exibir_info = False
+                    navegador()   
                 if e.button == 13:
                     pygame.quit()
                     sys.exit()
                 if e.button == 12:
                     exibir_info = True
                 if e.button == 0:
-                    exibir_info = False                        
+                    exibir_info = False
+                      
 
         if exibir_info:
             u.screen.blit(info, (0,0))
